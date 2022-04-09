@@ -1,0 +1,181 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <locale.h>
+
+// variável global
+char nomeArquivo[20] = "agenda.txt";
+
+struct Pessoa{
+    int codigo;
+    char nome[20];
+    int telefone;
+};
+
+// prototipação
+void menu();
+FILE *abrirArquivo(char modo, char *caminho);
+void fecharArquivo(FILE *arquivo);
+void inserirContato(struct Pessoa umaPessoa);
+void listarContato();
+int ultimoCodigoInserido();
+struct Pessoa pesquisarContatoPorCodigo();
+
+int main()
+{
+    setlocale(LC_ALL, "Portuguese");
+    int op,codigo;
+    struct Pessoa umaPessoa;
+    do{
+    menu();
+    scanf("%d", &op);
+
+        switch(op) {
+        case 1:
+            system("cls");
+            printf("Digite um nome: ");
+            scanf("%s", umaPessoa.nome);
+            printf("Digite o telefone: ");
+            scanf("%d", &umaPessoa.telefone);
+            inserirContato(umaPessoa);
+            system("pause");
+            break;
+        case 2:
+            system("cls");
+            listarContato();
+            system("pause");
+            break;
+        case 3:;
+            system("cls");
+            printf("\nFinalizando o sistema...\n\n");
+            system("pause");
+            break;
+        case 4:;
+            system("cls");
+            printf("\nFinalizando o sistema...\n\n");
+            scanf("%d", &umaPessoa.codigo);
+            umaPessoa = pesquisarContatoPorCodigo(umaPessoa.codigo);
+            if (umaPessoa.codigo != -1) {
+                printf("\nCodigo: %d - Nome: %s - Telefone: %d\n\n", umaPessoa.codigo, umaPessoa.nome, umaPessoa.telefone);
+            }else{
+                printf("\nDesculpe, o codigo %d nao foi encontrado!\n\n");
+            }
+            system("pause");
+            break;
+        case 5:;
+            system("cls");
+            printf("\nFinalizando o sistema...\n\n");
+            system("pause");
+            break;
+        default:
+            printf("\nOpcao invalida! digite novamente\n\n");
+            system("pause");
+
+    }
+    }while(op !=5);
+    return 0;
+}
+
+void menu(){
+    puts("\n");
+    printf("///////// Bem vindo ao sistema AGENDA ////////////\n");
+    printf("/    /    /    /    /    /     /     /    /    / /\n");
+    printf("/   /    /  Digite 1 para cadastrar /    /    /  /\n");
+    printf("/  /    /   Digite 2 para listar   /    /    /   /\n");
+    printf("/ /    /    Digite 3 para sair    /    /    /    /\n");
+    printf("//    /    /    /    /    /      /    /    /     /\n");
+    printf("//////////////////////////////////////////////////\n\n");
+    printf("- ");
+}
+
+FILE *abrirArquivo(char modo, char *caminho){
+    FILE *arquivo;
+
+    switch (modo){
+    case 'a':
+        arquivo = fopen(caminho, "a");
+        break;
+    case 'r':
+        arquivo = fopen(caminho, "rt");
+        break;
+    case 'w':
+        arquivo = fopen(caminho, "wt");
+        break;
+    }
+    if (arquivo == NULL){
+        printf("Erro ao abrir o arquivo!");
+        exit(0);
+    }
+
+    return arquivo;
+}
+
+void fecharArquivo(FILE *arquivo){
+    fclose(arquivo);
+}
+
+void inserirContato(struct Pessoa umaPessoa){
+    int codigo;
+    FILE *arquivo;
+    arquivo = abrirArquivo('a', nomeArquivo);
+    codigo = ultimoCodigoInserido() + 1;
+    fprintf(arquivo, "%d;%s;%d\n", codigo, umaPessoa.nome, umaPessoa.telefone);
+    fecharArquivo(arquivo);
+}
+void listarContato()
+{
+    FILE *arquivo;
+    struct Pessoa umaPessoa;
+    int cont = 0;
+
+    arquivo = abrirArquivo('r', nomeArquivo);
+    printf("Listando os contatos:\n");
+
+    while(!feof(arquivo))
+    {
+        fscanf(arquivo, "%d", &umaPessoa.codigo);
+        fscanf(arquivo, ";%[^;]s", umaPessoa.nome);
+        fscanf(arquivo, ";%d ", &umaPessoa.telefone);
+
+        printf("\nCodigo: %d - Nome: %s - Telefone: %d\n\n", umaPessoa.codigo, umaPessoa.nome, umaPessoa.telefone);
+        cont++;
+    }
+
+    fecharArquivo(arquivo);
+    printf("Total de registros: %d\n", cont);
+}
+int ultimoCodigoInserido(){
+    FILE *arquivo;
+    struct Pessoa umaPessoa;
+    int cont = 0;
+
+    arquivo = abrirArquivo('r', nomeArquivo);
+    while(!feof(arquivo))
+    {
+        fscanf(arquivo, "%d", &umaPessoa.codigo);
+        fscanf(arquivo, ";%[^;]s", umaPessoa.nome);
+        fscanf(arquivo, ";%d ", &umaPessoa.telefone);
+        cont = umaPessoa.codigo;
+    }
+    fecharArquivo(arquivo);
+    return cont;
+}
+struct Pessoa pesquisarContatoPorCodigo(int codigo){
+    FILE *arquivo;
+    struct Pessoa umaPessoa;
+
+    arquivo = abrirArquivo('r', nomeArquivo);
+    while(!feof(arquivo))
+    {
+        fscanf(arquivo, "%d", &umaPessoa.codigo);
+        fscanf(arquivo, ";%[^;]s", umaPessoa.nome);
+        fscanf(arquivo, ";%d ", &umaPessoa.telefone);
+        if (umaPessoa.codigo == codigo){
+            printf("\nCodigo: %d - Nome: %s - Telefone: %d\n\n", umaPessoa.codigo, umaPessoa.nome, umaPessoa.telefone);
+            fecharArquivo(arquivo);
+            return umaPessoa;
+        }
+    }
+    fecharArquivo(arquivo);
+    umaPessoa.codigo = -1;
+    return umaPessoa;
+}

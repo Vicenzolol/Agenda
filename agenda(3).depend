@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1495709601 source:c:\users\20171si028\downloads\agenda\main.c
+	<stdio.h>
+	<stdlib.h>
+
+1496143503 source:c:\users\20171si022\desktop\agenda\main.c
+	<stdio.h>
+	<stdlib.h>
+	<locale.h>
+
